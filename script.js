@@ -1,6 +1,18 @@
 const display = document.querySelector('.calculator__input');
 let stack = [];
 
+function loadFromLocalStorage() {
+    const savedStack = localStorage.getItem('calculatorStack');
+    if (savedStack) {
+        stack = JSON.parse(savedStack);
+        updateDisplay();
+    }
+}
+
+function saveToLocalStorage() {
+    localStorage.setItem('calculatorStack', JSON.stringify(stack));
+}
+
 function append(input) {
     if (!isNaN(input) || input === '.') {
         if (stack.length > 0 && (!isNaN(stack[stack.length - 1]) || stack[stack.length - 1].includes('.'))) {
@@ -11,16 +23,19 @@ function append(input) {
     } else {
         stack.push(input);
     }
+    saveToLocalStorage();
     updateDisplay();
 }
 
 function clearAll() {
     stack = [];
+    saveToLocalStorage();
     updateDisplay();
 }
 
 function clearLast() {
     stack.pop();
+    saveToLocalStorage();
     updateDisplay();
 }
 
@@ -34,6 +49,7 @@ function result() {
     let postfix = infixToPostfix(stack);
     let res = evaluatePostfix(postfix);
     stack = [res.toString()];
+    saveToLocalStorage();
     updateDisplay();
 }
 
@@ -77,3 +93,5 @@ function evaluatePostfix(postfix) {
     }
     return s.pop();
 }
+
+window.onload = loadFromLocalStorage;
