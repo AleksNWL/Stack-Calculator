@@ -2,8 +2,8 @@ const display = document.querySelector('.calculator__input');
 let stack = [];
 
 function append(input) {
-    if (!isNaN(input)) {
-        if (stack.length > 0 && !isNaN(stack[stack.length - 1])) {
+    if (!isNaN(input) || input === '.') {
+        if (stack.length > 0 && (!isNaN(stack[stack.length - 1]) || stack[stack.length - 1].includes('.'))) {
             stack[stack.length - 1] += input;
         } else {
             stack.push(input);
@@ -15,7 +15,7 @@ function append(input) {
 }
 
 function clearAll() {
-    stack.length = 0;
+    stack = [];
     updateDisplay();
 }
 
@@ -25,16 +25,55 @@ function clearLast() {
 }
 
 function updateDisplay() {
-    display.value = stack.join('');
+    display.value = stack.join(' ');
     console.log(stack);
 }
 
-function result () {
-    let operators = [];
-    for (let i = 0; i < stack.length; i++) {
-        if(isNaN(stack[i])) {
-            operators.push(stack[i]);
-            console.log(operators);
+function result() {
+    if (stack.length === 0) return;
+    let postfix = infixToPostfix(stack);
+    let res = evaluatePostfix(postfix);
+    stack = [res.toString()];
+    updateDisplay();
+}
+
+function infixToPostfix(infix) {
+    let prec = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3};
+    let out = [];
+    let ops = [];
+
+    for (let i = 0; i < infix.length; i++) {
+        let token = infix[i];
+        if (!isNaN(token)) {
+            out.push(token);
+        } else {
+            while (ops.length && prec[ops[ops.length - 1]] >= prec[token]) {
+                out.push(ops.pop());
+            }
+            ops.push(token);
         }
     }
+    while (ops.length) {
+        out.push(ops.pop());
+    }
+    return out;
+}
+
+function evaluatePostfix(postfix) {
+    let s = [];
+    for (let i = 0; i < postfix.length; i++) {
+        let token = postfix[i];
+        if (!isNaN(token)) {
+            s.push(parseFloat(token));
+        } else {
+            let b = s.pop();
+            let a = s.pop();
+            if (token === '+') s.push(a + b);
+            else if (token === '-') s.push(a - b);
+            else if (token === '*') s.push(a * b);
+            else if (token === '/') s.push(a / b);
+            else if (token === '^') s.push(Math.pow(a, b));
+        }
+    }
+    return s.pop();
 }
