@@ -16,6 +16,9 @@ function saveToLocalStorage() {
 function append(input) {
     if (!isNaN(input) || input === '.') {
         if (stack.length > 0 && (!isNaN(stack[stack.length - 1]) || stack[stack.length - 1].includes('.'))) {
+            if (input === '.' && stack[stack.length - 1].includes('.')) {
+                return;
+            }
             stack[stack.length - 1] += input;
         } else {
             stack.push(input);
@@ -54,24 +57,31 @@ function result() {
 }
 
 function infixToPostfix(infix) {
-    let prec = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3};
-    let out = [];
     let ops = [];
+    let out = [];
+    let priority = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3};
 
     for (let i = 0; i < infix.length; i++) {
         let token = infix[i];
         if (!isNaN(token)) {
             out.push(token);
         } else {
-            while (ops.length && prec[ops[ops.length - 1]] >= prec[token]) {
-                out.push(ops.pop());
+            while(ops.length) {
+                let opsTop = ops[ops.length - 1];
+                if (priority[opsTop] >= priority[token]) {
+                    out.push(ops.pop());
+                } else {
+                    break;
+                }
             }
             ops.push(token);
         }
     }
+
     while (ops.length) {
         out.push(ops.pop());
     }
+
     return out;
 }
 
@@ -84,11 +94,24 @@ function evaluatePostfix(postfix) {
         } else {
             let b = s.pop();
             let a = s.pop();
-            if (token === '+') s.push(a + b);
-            else if (token === '-') s.push(a - b);
-            else if (token === '*') s.push(a * b);
-            else if (token === '/') s.push(a / b);
-            else if (token === '^') s.push(Math.pow(a, b));
+            
+            switch (token) {
+                case '+': 
+                    s.push(a + b);
+                    break;
+                case '-':
+                    s.push(a - b);
+                    break;
+                case '*':
+                    s.push(a * b);
+                    break;
+                case '/':
+                    s.push(a / b);
+                    break;
+                case '^':
+                    s.push(Math.pow(a, b));
+                    break;
+            }
         }
     }
     return s.pop();
