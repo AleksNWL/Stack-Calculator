@@ -5,8 +5,9 @@ function loadFromLocalStorage() {
     const savedStack = localStorage.getItem('calculatorStack');
     if (savedStack) {
         stack = JSON.parse(savedStack);
-        updateDisplay();
     }
+    
+    updateDisplay();
 }
 
 function saveToLocalStorage() {
@@ -14,6 +15,10 @@ function saveToLocalStorage() {
 }
 
 function append(input) {
+    if (input !== '.' && stack[0] == '0') {
+        stack.pop();
+    }
+    
     if (!isNaN(input) || input === '.') {
         if (stack.length > 0 && (!isNaN(stack[stack.length - 1]) || stack[stack.length - 1].includes('.'))) {
             if (input === '.' && stack[stack.length - 1].includes('.')) {
@@ -43,16 +48,18 @@ function clearLast() {
 }
 
 function updateDisplay() {
+    if (stack.length === 0) {
+        stack = ['0'];
+    }
     display.value = stack.join(' ');
     console.log(stack);
 }
 
 function result() {
-    if (stack.length === 0) return;
+    saveToLocalStorage();
     let postfix = infixToPostfix(stack);
     let res = evaluatePostfix(postfix);
     stack = [res.toString()];
-    saveToLocalStorage();
     updateDisplay();
 }
 
@@ -77,7 +84,7 @@ function infixToPostfix(infix) {
             ops.push(token);
         }
     }
-
+    
     while (ops.length) {
         out.push(ops.pop());
     }
