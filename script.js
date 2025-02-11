@@ -15,13 +15,26 @@ function saveToLocalStorage() {
 }
 
 function append(input) {
+    if (input === 'open-bracket'){
+        input = '(';
+    } else if (input === 'close-bracket') {
+        input = ')';
+    }
+
+    let openBracket = stack.filter(x => x  === '(' ).length;
+    let closeBracket = stack.filter(x => x === ')').length;
+    if (input === ')' && closeBracket >= openBracket) {
+        return;
+    }
+
+
     if (input !== '.' && stack[0] == '0') {
         stack.pop();
     }
     
     if (!isNaN(input) || input === '.') {
         if (stack.length > 0 && (!isNaN(stack[stack.length - 1]) || stack[stack.length - 1].includes('.'))) {
-            if (input === '.' && stack[stack.length - 1].includes('.')) {
+            if (input === '.' && (stack[stack.length - 1].includes('.'))) {
                 return;
             }
             stack[stack.length - 1] += input;
@@ -29,7 +42,11 @@ function append(input) {
             stack.push(input);
         }
     } else {
-        stack.push(input);
+        if (stack[stack.length - 1].includes('(') && (input !== (('(') || (')')))) {
+            return;
+        } else {
+            stack.push(input);
+        }
     }
     saveToLocalStorage();
     updateDisplay();
@@ -72,10 +89,17 @@ function infixToPostfix(infix) {
         let token = infix[i];
         if (!isNaN(token)) {
             out.push(token);
-        } else {
+        } else if (token === '(') {
+            ops.push(token);
+        } else if (token === ')') {
+            while (ops[ops.length - 1] !== '(' ) {
+                out.push(ops.pop());
+            }
+            ops.pop();
+        }
+        else {
             while(ops.length) {
-                let opsTop = ops[ops.length - 1];
-                if (priority[opsTop] >= priority[token]) {
+                if (priority[ops[ops.length - 1]] >= priority[token]) {
                     out.push(ops.pop());
                 } else {
                     break;

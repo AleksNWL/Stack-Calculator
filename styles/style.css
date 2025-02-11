@@ -47,7 +47,7 @@ body {
     gap: 10px;
 }
 
-.calculator__button--zero {
+.calculator__two-section {
     grid-column: span 2;
 }
 
