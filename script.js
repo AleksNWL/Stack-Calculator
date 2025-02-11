@@ -42,14 +42,14 @@ function append(input) {
             stack.push(input);
         }
     } else {
-        if (stack[stack.length - 1].includes('(') && (input !== (('(') || (')')))) {
-            return;
-        } else {
-            stack.push(input);
-        }
+        stack.push(input);
     }
     saveToLocalStorage();
     updateDisplay();
+}
+
+function keydown() {
+
 }
 
 function clearAll() {
@@ -149,3 +149,19 @@ function evaluatePostfix(postfix) {
 }
 
 window.onload = loadFromLocalStorage;
+
+document.addEventListener('keydown', function(event) {
+    if (!isNaN(event.key) || ['-', '/'].includes(event.key)) {
+        append(event.key);
+    } else if (event.shiftKey && ['+', '*', '^', '(', ')'].includes(event.key)) {
+        append(event.key);
+    } else if (event.key === 'Backspace') {
+        clearLast();
+    } else if (event.key === 'Delete') {
+        clearAll();
+    } else if (event.key === 'Enter') {
+        result();
+    } else {
+        event.preventDefault();
+    }
+});
